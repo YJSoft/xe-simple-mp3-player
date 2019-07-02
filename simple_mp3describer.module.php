@@ -1,6 +1,4 @@
 <?php
-if(!defined("__XE__")) exit();
-
 class SimpleMP3Describer {
     private $use_encrypt = false;
     private $password = null;
