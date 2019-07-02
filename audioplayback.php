@@ -1,5 +1,4 @@
 <?php
-
 require_once './simple_encrypt.module.php';
 
 function isEncrypted() {
@@ -137,10 +136,3 @@ if($isSegment) {
 }
 
 fclose($file);
-
-
-
-
-
-
-
