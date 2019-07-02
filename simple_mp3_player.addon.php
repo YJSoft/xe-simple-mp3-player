@@ -8,11 +8,13 @@ $simple_mp3_autoload_map = array(
   "SimpleMP3Describer" => _XE_PATH_ . 'addons/simple_mp3_player/simple_mp3describer.module.php'
 );
 
-function _simple_mp3_autoload_function($class) {
-    if(isset($simple_mp3_autoload_map[$class])) require_once($simple_mp3_autoload_map[$class]);
+if(!function_exists('_simple_mp3_autoload_function')) {
+  function _simple_mp3_autoload_function($class) {
+      if(isset($simple_mp3_autoload_map[$class])) require_once($simple_mp3_autoload_map[$class]);
+  }
+  
+  spl_autoload_register('_simple_mp3_autoload_function');
 }
-
-spl_autoload_register('_simple_mp3_autoload_function');
 
 $act = Context::get('act');
 if($called_position === 'before_module_init' && in_array($_SERVER['REQUEST_METHOD'], array('GET', 'POST'))){
