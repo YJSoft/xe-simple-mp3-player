@@ -1,10 +1,10 @@
 <?php
 
-if(!defined("__ZBXE__")) exit();
+if(!defined("__XE__")) exit();
 
-require_once('./addons/simple_mp3_player/lib/phpmp3.php');
-require_once('./addons/simple_mp3_player/lib/getid3/getid3.php');
-require_once('./addons/simple_mp3_player/simple_encrypt.module.php');
+require_once(_XE_PATH_ . 'addons/simple_mp3_player/lib/phpmp3.php');
+require_once(_XE_PATH_ . 'addons/simple_mp3_player/lib/getid3/getid3.php');
+require_once(_XE_PATH_ . 'addons/simple_mp3_player/simple_encrypt.module.php');
 
 if(!class_exists('SimpleMP3Describer', false)) {
     class SimpleMP3Describer {
