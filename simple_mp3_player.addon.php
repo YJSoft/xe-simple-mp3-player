@@ -2,18 +2,18 @@
 if(!defined("__XE__")) exit();
 
 if(!function_exists('_simple_mp3_autoload_function')) {
-  function _simple_mp3_autoload_function($class) {
-      $simple_mp3_autoload_map = array(
-        "PHPMP3" => _XE_PATH_ . 'addons/simple_mp3_player/lib/phpmp3.php',
-        "getID3" => _XE_PATH_ . 'addons/simple_mp3_player/lib/getid3/getid3.php',
-        "SimpleEncrypt" => _XE_PATH_ . 'addons/simple_mp3_player/simple_encrypt.module.php',
-        "SimpleMP3Describer" => _XE_PATH_ . 'addons/simple_mp3_player/simple_mp3describer.module.php'
-      );
+    function _simple_mp3_autoload_function($class) {
+        $simple_mp3_autoload_map = array(
+          "PHPMP3" => _XE_PATH_ . 'addons/simple_mp3_player/lib/phpmp3.php',
+          "getID3" => _XE_PATH_ . 'addons/simple_mp3_player/lib/getid3/getid3.php',
+          "SimpleEncrypt" => _XE_PATH_ . 'addons/simple_mp3_player/simple_encrypt.module.php',
+          "SimpleMP3Describer" => _XE_PATH_ . 'addons/simple_mp3_player/simple_mp3describer.module.php'
+        );
 
-      if(isset($simple_mp3_autoload_map[$class])) require_once($simple_mp3_autoload_map[$class]);
-  }
+        if(isset($simple_mp3_autoload_map[$class])) require_once($simple_mp3_autoload_map[$class]);
+    }
 
-  spl_autoload_register('_simple_mp3_autoload_function');
+    spl_autoload_register('_simple_mp3_autoload_function');
 }
 
 $act = Context::get('act');
