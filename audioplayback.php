@@ -24,6 +24,14 @@ function determineValidParameter() {
         $text .= (string)$_GET[$eachArgument];
     }
 
+    if(substr(md5($text . SimpleEncrypt::getPassword()), 0, 12) == $hash) {
+      return TRUE;
+    } else {
+      header('HTTP/1.1 403 Forbidden');
+      header('X-SimpleEncrypt-Expected: ' . substr(md5($text . SimpleEncrypt::getPassword()), 0, 12));
+      header('X-SimpleEncrypt-Sent: ' . $hash);
+    }
+
     return substr(md5($text . SimpleEncrypt::getPassword()), 0, 12) == $hash;
 }
 
@@ -32,7 +40,6 @@ function determineValidParameter() {
 // ============================= 요청 시작 부분
 
 if(!determineValidParameter()) {
-    header('HTTP/1.1 403 Forbidden');
     return;
 }
 $password = SimpleEncrypt::getPassword();
