@@ -189,7 +189,7 @@ class SimpleMP3Describer {
     }
 
     static function getDescriptionFilePath($file_srl = null, $mp3FilePath = null) {
-        $basepath = _XE_PATH_ . "files/simple_mp3_player/";
+        $basepath = "./files/simple_mp3_player/";
         $regex = "/(\d+)\/(?:(\d+)\/)?(?:(\d+)\/)?\w+.\w+$/";
         preg_match_all($regex, $mp3FilePath, $result);
         if(count($result[1])) {
