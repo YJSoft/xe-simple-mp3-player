@@ -54,7 +54,7 @@ class SimpleMP3Describer {
     }
 
     private function createURLWithParameters($argsArr, $skipArgsArr = array()) {
-        $url = _XE_PATH_ . 'addons/simple_mp3_player/audioplayback.php?';
+        $url = './addons/simple_mp3_player/audioplayback.php?';
         $keys = array();
         $valueStr = '';
         $isFirst = true;
