@@ -27,11 +27,11 @@ function determineValidParameter() {
     return substr(md5($text . SimpleEncrypt::getPassword()), 0, 12) == $hash;
 }
 
-
-
 // ============================= 요청 시작 부분
 
 if(!determineValidParameter()) {
+    header('HTTP/1.1 403 Forbidden');
+    header('X-SimpleEncrypt-Reason: Invalid Parameter');
     return;
 }
 $password = SimpleEncrypt::getPassword();
