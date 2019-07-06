@@ -132,6 +132,7 @@
         var mp4inmp3 = 'audio/mp4; codecs="mp3"';
         var mp4audio = "audio/mp4";
 
+        // TODO Change UA Check to function check
         var ua = typeof window.navigator !== "undefined" ? window.navigator.userAgent : "";
         var safari = !/chrome|opera/i.test(ua) && /safari/i.test(ua);
         var msie =  ua.indexOf("Trident/") >= 0 || ua.indexOf("MSIE ") >= 0;

@@ -1,44 +1,58 @@
 <?php
-
 require_once './simple_encrypt.module.php';
 
+/**
+ * Function to determine source is encrypted
+ * @return boolean TRUE if source is encrypted
+ */
 function isEncrypted() {
     $Signature = isset($_GET['Signature']) ? $_GET['Signature'] : null;
 
     return !!$Signature;
 }
 
-function determineValidParameter() {
+/**
+ * Generate hash fron GET parameter
+ * and check hash to check header is valid
+ * If password is wrong, SN will not match
+ * @param  [type] $password password string
+ * @return [type]           TRUE if request is valid
+ */
+function determineValidParameter($password) {
     $arguments = isset($_GET['arguments']) ? $_GET['arguments'] : null;
     $hash = isset($_GET['SN']) ? $_GET['SN'] : null;
     $text = '';
     if(!$arguments || !$hash) {
-        return false;
+        return FALSE;
     }
-    $arguments_split =explode(',', $arguments);
+    $arguments_split = explode(',', $arguments);
     foreach($arguments_split as $eachArgument) {
         $argType = gettype($eachArgument);
         if(!isset($_GET[$eachArgument]) || !($argType === 'number' || $argType === 'string')) {
-            return false;
+            return FALSE;
         }
 
         $text .= (string)$_GET[$eachArgument];
     }
 
-    return substr(md5($text . SimpleEncrypt::getPassword()), 0, 12) == $hash;
+    return substr(md5($text . $password), 0, 12) == $hash;
 }
 
+$password = SimpleEncrypt::getPassword();
 
-
-// ============================= 요청 시작 부분
-
-if(!determineValidParameter()) {
+// If GET parameter is invalid(Expired / Invalid password)
+if(!determineValidParameter($password)) {
+    // Consider this request as "Not valid" and send HTTP 403
     header('HTTP/1.1 403 Forbidden');
+    header('X-SimpleEncrypt-Reason: Invalid Parameter');
     return;
 }
-$password = SimpleEncrypt::getPassword();
+
 $uploaded_filename = null;
+
+// If source is encrypted(needs decryption to play)
 if(isEncrypted()) {
+    // Check encrypt / decrypt is supported on this system
     if(SimpleEncrypt::isEncryptSupported()) {
         $Signature = $_GET['Signature'];
         if($Signature && $password) {
@@ -48,35 +62,51 @@ if(isEncrypted()) {
             }
         }
     }
+// If source is not encrypted, pass uploaded mp3 file path(direct play)
 } else {
     $uploaded_filename = $file = $_GET['file'];
 }
+
+// Determine MIME type from request
 $mimeType = isset($_GET['mime']) && $_GET['mime'] !== 'unknown' ? $_GET['mime'] : null;
+
+// Parse offset, isSegmant
 $startOffset = isset($_GET['start']) ? (int)$_GET['start'] : null;
 $endOffset = isset($_GET['end']) ? (int)$_GET['end'] : null;
 $isSegment = $_GET['type'] === 'realtime';
+
+// Try to load mp3 source
 $uploaded_filename = '../../'.$uploaded_filename;
 $filesize = null;
+
+// If file exists
 if($uploaded_filename && file_exists($uploaded_filename)) {
     $filesize = filesize($uploaded_filename);
+
+    // Check range parameter if segmented play(realtime)
     if($isSegment) {
+        // If range is invalid
         if($startOffset < 0 || $endOffset>$filesize || $startOffset>$endOffset) {
             header('HTTP/1.1 416 Requested Range Not Satisfiable');
             exit();
         }
     }
+// If file not exists
 } else {
     header('HTTP/1.1 404 Not Found');
     exit();
 }
 
+// Get file start / end position, length
 $streamStartOffset = isset($_GET['streamStartOffset']) ? (int)$_GET['streamStartOffset'] : 0;
 $streamEndOffset = isset($_GET['streamEndOffset']) ? (int)$_GET['streamEndOffset'] : $filesize-1;
 $streamLength = $streamStartOffset !== null && $streamEndOffset !== null ? $streamEndOffset-$streamStartOffset+1 : $filesize;
 
+// Open mp3 file to memory
 $file = fopen($uploaded_filename, 'r');
 header('Accept-Ranges: bytes');
 
+// If segmented(realtime) play
 if($isSegment) {
     $size = $endOffset-$startOffset+1;
     fseek($file, $startOffset);
@@ -84,6 +114,7 @@ if($isSegment) {
     header('Content-Length: ' . $size);
 
     echo $data;
+// Else(send whole file at once)
 } else {
     header('Content-Type: '.$mimeType);
     header("Accept-Ranges: bytes");
@@ -137,10 +168,3 @@ if($isSegment) {
 }
 
 fclose($file);
-
-
-
-
-
-
-
