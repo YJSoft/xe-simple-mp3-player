@@ -118,10 +118,11 @@ if($called_position === 'before_module_init' && in_array($_SERVER['REQUEST_METHO
         if(!file_exists($skin_path . 'skin.json')) {
             $addon_info->playlist_player = 'APlayer';
         }
-        
+
         $skin_info = json_decode(file_get_contents($skin_path . 'skin.json'));
         foreach($skin_info->files as $file) {
-            Context::loadFile(array($skin_path . $file, 'body', '', null), true);
+            if(substr(strrchr($file, "."), 1) === "css") Context::loadFile($skin_path . $file, true);
+            else Context::loadFile(array($skin_path . $file, 'body', '', null), true);
         }
 
         if(($addon_info->playlist_player === 'APlayer' || $addon_info->playlist_player === 'APlayer_fixed') && isset($addon_info->link_to_media) && $addon_info->link_to_media === "Y") {
