@@ -63,18 +63,18 @@ if($called_position === 'before_module_init' && in_array($_SERVER['REQUEST_METHO
         echo json_encode($result);
 
         exit();
-    } else if($act === 'geSimpleMP3SkinInfo') {
+    } else if($act == 'geSimpleMP3SkinInfo') {
         $result = new stdClass();
-        $result->message = "success";
-        $result->code = 0;
+        $result->message = "not-implemented";
+        $result->code = -1;
         echo json_encode($result);
 
         exit();
-    } else if($act === 'geSimpleMP3SkinList') {
+    } else if($act == 'geSimpleMP3SkinList') {
         $result = new stdClass();
         $result->skins = array();
-        $result->message = "success";
-        $result->code = 0;
+        $result->message = "not-implemented";
+        $result->code = -1;
         echo json_encode($result);
 
         exit();
