@@ -1,1 +1,1 @@
-$.exec_json("simplemp3player.geSimpleMP3SkinList",{},function(ret){console.log(ret)})
+// TODO port to module to use XE's get_json
