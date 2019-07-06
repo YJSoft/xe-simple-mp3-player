@@ -63,6 +63,21 @@ if($called_position === 'before_module_init' && in_array($_SERVER['REQUEST_METHO
         echo json_encode($result);
 
         exit();
+    } else if($act === 'geSimpleMP3SkinInfo') {
+        $result = new stdClass();
+        $result->message = "not-implemented";
+        $result->code = -1;
+        echo json_encode($result);
+
+        exit();
+    } else if($act === 'geSimpleMP3SkinList') {
+        $result = new stdClass();
+        $result->skins = array();
+        $result->message = "not-implemented";
+        $result->code = -1;
+        echo json_encode($result);
+
+        exit();
     }
 // File / Document / Comment Delete
 } else if(in_array($act, array('procFileDelete', 'procBoardDeleteDocument', 'procBoardDeleteComment'))) {
@@ -89,20 +104,26 @@ if($called_position === 'before_module_init' && in_array($_SERVER['REQUEST_METHO
         SimpleMP3Describer::HandleDeleteDescription();
     }
 // after_module_proc
-} else if($called_position == 'after_module_proc' && Context::getResponseMethod()!="XMLRPC" && Context::get('document_srl')) {
-    Context::loadFile(array(_XE_PATH_ . 'addons/simple_mp3_player/js/corejs.min.js', 'body', '', null), true);
-    Context::loadFile(array(_XE_PATH_ . 'addons/simple_mp3_player/js/transmuxer.js', 'body', '', null), true);
-    Context::loadFile(array(_XE_PATH_ . 'addons/simple_mp3_player/js/base.js', 'body', '', null), true);
-    $skin_path = _XE_PATH_ . 'addons/simple_mp3_player/skins/' . $addon_info->playlist_player . '/';
-    if(!isset($addon_info->playlist_player) || !$addon_info->playlist_player || !file_exists($skin_path . 'skin.json')) {
-        $addon_info->playlist_player = 'APlayer';
-    }
-    $skin_info = json_decode(file_get_contents($skin_path . 'skin.json'));
-    foreach($skin_info->files as $file) {
-        Context::loadFile(array($skin_path . $file, 'body', '', null), true);
+} else if($called_position == 'after_module_proc' && Context::getResponseMethod()!="XMLRPC") {
+    if(!!Context::get('document_srl')) {
+        Context::loadFile(array(_XE_PATH_ . 'addons/simple_mp3_player/js/corejs.min.js', 'body', '', null), true);
+        Context::loadFile(array(_XE_PATH_ . 'addons/simple_mp3_player/js/transmuxer.js', 'body', '', null), true);
+        Context::loadFile(array(_XE_PATH_ . 'addons/simple_mp3_player/js/base.js', 'body', '', null), true);
+        $skin_path = _XE_PATH_ . 'addons/simple_mp3_player/skins/' . $addon_info->playlist_player . '/';
+        if(!isset($addon_info->playlist_player) || !$addon_info->playlist_player || !file_exists($skin_path . 'skin.json')) {
+            $addon_info->playlist_player = 'APlayer';
+        }
+        $skin_info = json_decode(file_get_contents($skin_path . 'skin.json'));
+        foreach($skin_info->files as $file) {
+            Context::loadFile(array($skin_path . $file, 'body', '', null), true);
+        }
+
+        if(($addon_info->playlist_player === 'APlayer' || $addon_info->playlist_player === 'APlayer_fixed') && isset($addon_info->link_to_media) && $addon_info->link_to_media === "Y") {
+            Context::loadFile(array(_XE_PATH_ . 'addons/simple_mp3_player/js/mp3link_to_player.js', 'body', '', null), true);
+        }
+    // simple mp3 player addon setting hook
+    } else if($act === "dispAddonAdminSetup" && Context::get('selected_addon') === "simple_mp3_player") {
+        Context::loadFile(array(_XE_PATH_ . 'addons/simple_mp3_player/js/skin.js', 'body', '', null), true);
     }
 
-    if(($addon_info->playlist_player === 'APlayer' || $addon_info->playlist_player === 'APlayer_fixed') && isset($addon_info->link_to_media) && $addon_info->link_to_media === "Y") {
-        Context::loadFile(array(_XE_PATH_ . 'addons/simple_mp3_player/js/mp3link_to_player.js', 'body', '', null), true);
-    }
 }
