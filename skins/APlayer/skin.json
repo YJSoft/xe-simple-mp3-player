@@ -1,0 +1,26 @@
+{
+  "title": {
+    "ko": "APlayer",
+    "en": "APlayer"
+  },
+  "description": {
+    "ko": "Simple MP3 Player용 APlayer 스킨입니다.",
+    "en": "APlayer skin for Simple MP3 Player."
+  },
+  "version": "0.1.1",
+  "date": "2019-07-01",
+  "author": {
+    "name": {
+      "ko": "후하니",
+      "en": "Huhani"
+    },
+    "email": "mmia268@gmail.com",
+    "link": "http://dnip.co.kr/"
+  },
+  "license": "GPLv3",
+  "files": [
+    "css/APlayer.min.css",
+    "js/APlayer.min.js",
+    "js/aplayer_loader.js"
+  ]
+}

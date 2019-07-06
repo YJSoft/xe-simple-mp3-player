@@ -93,19 +93,16 @@ if($called_position === 'before_module_init' && in_array($_SERVER['REQUEST_METHO
     Context::loadFile(array(_XE_PATH_ . 'addons/simple_mp3_player/js/corejs.min.js', 'body', '', null), true);
     Context::loadFile(array(_XE_PATH_ . 'addons/simple_mp3_player/js/transmuxer.js', 'body', '', null), true);
     Context::loadFile(array(_XE_PATH_ . 'addons/simple_mp3_player/js/base.js', 'body', '', null), true);
-    if(!isset($addon_info->playlist_player) || !$addon_info->playlist_player) {
+    $skin_path = _XE_PATH_ . 'addons/simple_mp3_player/skins/' . $addon_info->playlist_player . '/';
+    if(!isset($addon_info->playlist_player) || !$addon_info->playlist_player || !file_exists($skin_path . 'skin.json')) {
         $addon_info->playlist_player = 'APlayer';
     }
-    if($addon_info->playlist_player === 'APlayer') {
-        Context::loadFile(_XE_PATH_ . 'addons/simple_mp3_player/css/APlayer.min.css', true);
-        Context::loadFile(array(_XE_PATH_ . 'addons/simple_mp3_player/js/APlayer.min.js', 'body', '', null), true);
-        Context::loadFile(array(_XE_PATH_ . 'addons/simple_mp3_player/js/aplayer_loader.js', 'body', '', null), true);
-    } else if($addon_info->playlist_player === 'APlayer_fixed') {
-        Context::loadFile(_XE_PATH_ . 'addons/simple_mp3_player/css/APlayer.min.css', true);
-        Context::loadFile(array(_XE_PATH_ . 'addons/simple_mp3_player/js/APlayer.min.js', 'body', '', null), true);
-        Context::loadFile(array(_XE_PATH_ . 'addons/simple_mp3_player/js/aplayer_fixed_loader.js', 'body', '', null), true);
+    $skin_info = json_decode(file_get_contents($skin_path . 'skin.json'));
+    foreach($skin_info->files as $file) {
+        Context::loadFile(array($skin_path . $file, 'body', '', null), true);
     }
-    if(isset($addon_info->link_to_media) && $addon_info->link_to_media === "Y") {
+
+    if(($addon_info->playlist_player === 'APlayer' || $addon_info->playlist_player === 'APlayer_fixed') && isset($addon_info->link_to_media) && $addon_info->link_to_media === "Y") {
         Context::loadFile(array(_XE_PATH_ . 'addons/simple_mp3_player/js/mp3link_to_player.js', 'body', '', null), true);
     }
 }

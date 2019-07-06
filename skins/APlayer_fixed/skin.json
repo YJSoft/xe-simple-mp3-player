@@ -1,0 +1,26 @@
+{
+  "title": {
+    "ko": "APlayer (하단 고정형)",
+    "en": "APlayer (Bottom fixed)"
+  },
+  "description": {
+    "ko": "Simple MP3 Player용 APlayer 하단 고정형 스킨입니다. APlayer 스킨이 필요합니다.",
+    "en": "APlayer skin for Simple MP3 Player. Requires APlayer skin."
+  },
+  "version": "0.1.1",
+  "date": "2019-07-01",
+  "author": {
+    "name": {
+      "ko": "후하니",
+      "en": "Huhani"
+    },
+    "email": "mmia268@gmail.com",
+    "link": "http://dnip.co.kr/"
+  },
+  "license": "GPLv3",
+  "files": [
+    "../APlayer_fixed/css/APlayer.min.css",
+    "../APlayer_fixed/js/APlayer.min.js",
+    "js/aplayer_fixed_loader.js"
+  ]
+}
