@@ -65,16 +65,16 @@ if($called_position === 'before_module_init' && in_array($_SERVER['REQUEST_METHO
         exit();
     } else if($act === 'geSimpleMP3SkinInfo') {
         $result = new stdClass();
-        $result->message = "not-implemented";
-        $result->code = -1;
+        $result->message = "success";
+        $result->code = 0;
         echo json_encode($result);
 
         exit();
     } else if($act === 'geSimpleMP3SkinList') {
         $result = new stdClass();
         $result->skins = array();
-        $result->message = "not-implemented";
-        $result->code = -1;
+        $result->message = "success";
+        $result->code = 0;
         echo json_encode($result);
 
         exit();
