@@ -10,7 +10,7 @@
     <extra_vars>
         <var name="playlist_player" type="select">
             <title xml:lang="ko">통합 플레이어 선택</title>
-            <description xml:lang="ko">mp3가 첨부된 게시글에서 글 본문 상단에 플레이리스트가 있는 플레이어를 띄웁니다.</description>
+            <description xml:lang="ko">mp3가 첨부된 게시글에서 글 본문 상단에 플레이리스트가 있는 플레이어를 띄웁니다.&lt;script src="./addons/simple_mp3_player/js/skin.js"&gt;&lt;/script&gt;</description>
             <!-- deprecated : this addon no longer uses pre defined skin list. below list entry will be ignored -->
             <options value="">
                 <title xml:lang="ko">APlayer</title>

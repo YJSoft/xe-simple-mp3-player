@@ -129,8 +129,5 @@ if($called_position === 'before_module_init' && in_array($_SERVER['REQUEST_METHO
             Context::loadFile(array(_XE_PATH_ . 'addons/simple_mp3_player/js/mp3link_to_player.js', 'body', '', null), true);
         }
     // simple mp3 player addon setting hook
-    } else if($act === "dispAddonAdminSetup" && Context::get('selected_addon') === "simple_mp3_player") {
-        Context::loadFile(array(_XE_PATH_ . 'addons/simple_mp3_player/js/skin.js', 'body', '', null), true);
     }
-
 }
