@@ -1,4 +1,7 @@
 <?php
+/**
+ * Handles MP3 file streaming
+ */
 class SimpleMP3Describer {
     private $use_encrypt = false;
     private $password = null;

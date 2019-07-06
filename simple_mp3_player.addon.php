@@ -17,6 +17,8 @@ if(!function_exists('_simple_mp3_autoload_function')) {
 }
 
 $act = Context::get('act');
+
+// before_module_init
 if($called_position === 'before_module_init' && in_array($_SERVER['REQUEST_METHOD'], array('GET', 'POST'))){
     if(in_array($act, array('geSimpleMP3Description', 'geSimpleMP3Descriptions'))) {
         $config = new stdClass();
@@ -62,7 +64,7 @@ if($called_position === 'before_module_init' && in_array($_SERVER['REQUEST_METHO
 
         exit();
     }
-
+// File / Document / Comment Delete
 } else if(in_array($act, array('procFileDelete', 'procBoardDeleteDocument', 'procBoardDeleteComment'))) {
     if($called_position === 'before_module_proc') {
         $target_srl = Context::get('document_srl');
@@ -86,7 +88,7 @@ if($called_position === 'before_module_init' && in_array($_SERVER['REQUEST_METHO
     } else if ($called_position === 'after_module_proc') {
         SimpleMP3Describer::HandleDeleteDescription();
     }
-
+// after_module_proc
 } else if($called_position == 'after_module_proc' && Context::getResponseMethod()!="XMLRPC" && Context::get('document_srl')) {
     Context::loadFile(array(_XE_PATH_ . 'addons/simple_mp3_player/js/corejs.min.js', 'body', '', null), true);
     Context::loadFile(array(_XE_PATH_ . 'addons/simple_mp3_player/js/transmuxer.js', 'body', '', null), true);
