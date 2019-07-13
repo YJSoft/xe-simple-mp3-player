@@ -29,6 +29,13 @@ if($called_position === 'before_module_init' && in_array($_SERVER['REQUEST_METHO
         $config->default_cover = isset($addon_info->default_cover) ? $addon_info->default_cover : null;
         $config->allow_browser_cache = (isset($addon_info->allow_browser_cache) && $addon_info->allow_browser_cache === "Y");
         $config->playlist_player_selector = isset($addon_info->playlist_player_selector) ? $addon_info->playlist_player_selector : null;
+
+        $config->use_lyric = (isset($addon_info->use_lyric) && $addon_info->use_lyric === "Y");
+        $config->use_m_lyric = (isset($addon_info->use_m_lyric) && $addon_info->use_m_lyric === "Y");
+        $config->lyric_cache_expire = isset($addon_info->lyric_cache_expire) && $addon_info->lyric_cache_expire ? $addon_info->lyric_cache_expire : 72;
+        $config->lyric_cache_retry_duration = isset($addon_info->lyric_cache_retry_duration) && $addon_info->lyric_cache_retry_duration ? $addon_info->lyric_cache_retry_duration : 30;
+        $config->isMobile = Mobile::isFromMobilePhone();
+
         if(!$config->default_cover) {
             $config->default_cover = _XE_PATH_ . 'addons/simple_mp3_player/img/no_cover.png';
         }
