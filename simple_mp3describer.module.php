@@ -97,10 +97,7 @@ class SimpleMP3Describer {
         $timestamp = time();
         if($files) {
             foreach($files as $file) {
-                $description = $this->getDescriptionFile($file->file_srl, $file->uploaded_filename);
-                if(!$description) {
-                    $description = $this->getMP3DescriptionFromOrigin($document_srl, $file->file_srl, $file->source_filename ,$file->uploaded_filename);
-                }
+                $description = self::getDescription($file->file_srl, $file->uploaded_filename, $file->source_filename, $document_srl);
                 if($description) {
                     $fileParts = pathinfo($file->uploaded_filename);
                     $sourceFileParts = pathinfo($file->source_filename);
@@ -191,6 +188,15 @@ class SimpleMP3Describer {
         return $descriptions;
     }
 
+    static function getDescription($file_srl, $uploaded_filename, $source_filename, $document_srl = null) {
+        $description = self::getDescriptionFile($file_srl, $uploaded_filename);
+        if(!$description) {
+            $description = self::getMP3DescriptionFromOrigin($document_srl, $file_srl, $source_filename, $uploaded_filename);
+        }
+
+        return $description;
+    }
+
     static function getDescriptionFilePath($file_srl = null, $mp3FilePath = null) {
         $basepath = "./files/simple_mp3_player/";
         $regex = "/(\d+)\/(?:(\d+)\/)?(?:(\d+)\/)?\w+.\w+$/";
@@ -202,7 +208,7 @@ class SimpleMP3Describer {
         return null;
     }
 
-    function getDescriptionFile($file_srl, $pathname) {
+    static function getDescriptionFile($file_srl, $pathname) {
         $basePath = self::getDescriptionFilePath($file_srl, $pathname);
         if($basePath) {
             $description = FileHandler::readFile($basePath."description.json");
@@ -214,9 +220,9 @@ class SimpleMP3Describer {
         return null;
     }
 
-    function getMP3DescriptionFromOrigin($document_srl, $file_srl, $source_filename = null, $filepath = null) {
+    static function getMP3DescriptionFromOrigin($document_srl, $file_srl, $source_filename = null, $filepath = null) {
         if(!$filepath) {
-            $filepathData = $this->getFilePathname($file_srl, $document_srl);
+            $filepathData = self::getFilePathname($file_srl, $document_srl);
             if($filepathData) {
                 $filepath = $filepathData->uploaded_filename;
             }
@@ -233,7 +239,7 @@ class SimpleMP3Describer {
             return null;
         }
 
-        $mp3Spec = $this->getMP3Sepc($filepath);
+        $mp3Spec = self::getMP3Spec($filepath);
         $tags = $mp3Spec ? $mp3Spec->tags : null;
         $stream = $mp3Spec ? $mp3Spec->stream : null;
         $obj = new stdClass();
@@ -244,15 +250,15 @@ class SimpleMP3Describer {
         $obj->stream = $stream;
         $obj->isValidFile = !!($stream && $stream->format);
         if(($stream && $stream->format === 'mp3') || (!$stream && $extension === 'mp3')) {
-            $offsets = $this->getSplitPosition($filepath);
+            $offsets = self::getSplitPosition($filepath);
             $obj->isValidFile = !!(isset($offsets->duration) && $offsets->duration > 2);
             $obj->offsetInfo = $offsets;
         }
 
-        return $this->createDescriptionFile($obj, $descriptionFilePath);
+        return self::createDescriptionFile($obj, $descriptionFilePath);
     }
 
-    function createDescriptionFile($originDescription = null, $savePath) {
+    static function createDescriptionFile($originDescription = null, $savePath) {
         if($originDescription && $savePath) {
             if(!FileHandler::makeDir($savePath)) {
                 return null;
@@ -283,7 +289,7 @@ class SimpleMP3Describer {
         return null;
     }
 
-    function getSplitPosition($pathname) {
+    static function getSplitPosition($pathname) {
         try {
             $mp3 = new PHPMP3($pathname);
             $offsets = $mp3->getSplitPosition(array(2,3,5));
@@ -329,7 +335,7 @@ class SimpleMP3Describer {
         return array();
     }
 
-    function getFilePathname($file_srl, $upload_target_srl = null) {
+    static function getFilePathname($file_srl, $upload_target_srl = null) {
         if($file_srl) {
             $oFileModel = getModel('file');
             $oFile = $oFileModel->getFile($file_srl);
@@ -345,7 +351,7 @@ class SimpleMP3Describer {
         return null;
     }
 
-    function getMP3Sepc($mp3Pathname) {
+    static function getMP3Spec($mp3Pathname) {
         try {
             $getID3 = new getID3;
             $ThisFileInfo = $getID3->analyze($mp3Pathname);
@@ -469,4 +475,145 @@ class SimpleMP3Describer {
         }
     }
 
+    public static function isAccessableDocument($document_srl) {
+        $oDocumentModel = getModel('document');
+        $oDocument = $oDocumentModel->getDocument($document_srl);
+        if($oDocument && $oDocument->isExists() && $oDocument->isAccessible()) {
+            return true;
+        }
+        return false;
+    }
+
+    public static function getALSongLyric($file_srl, $expire = 72, $renewDuration = 30) {
+        $oFileModel = getModel('file');
+        $oFile = $oFileModel->getFile($file_srl);
+        if($oFile) {
+            $upload_target_srl = $oFile->upload_target_srl;
+            $isAccessableDocument = self::isAccessableDocument($upload_target_srl);
+            if(!$isAccessableDocument) {
+                return null;
+            }
+            $description = self::getDescription($file_srl, $oFile->uploaded_filename, $oFile->source_filename, $upload_target_srl);
+            if($description) {
+                $lyricFromFile = self::getALSongLyricFromFile($file_srl, $oFile->uploaded_filename);
+                $lyricFileExists = false;
+                $requireRenew = false;
+                if($lyricFromFile) {
+                    $lyricFileExists = true;
+                    if($lyricFromFile->lyric) {
+                        if($lyricFromFile->birthtime + $expire*60*60 > time()) {
+                            return $lyricFromFile->lyric;
+                        } else {
+                            $requireRenew = true;
+                        }
+                    } else if($lyricFromFile->lyric === null && $lyricFromFile->birthtime + $renewDuration * 60 > time()) {
+                        return null;
+                    }
+                }
+                $startOffset = null;
+                $stream = isset($description->stream) && $description->stream ? $description->stream : null;
+                $offsetInfo = isset($description->offsetInfo) && $description->offsetInfo ? $description>offsetInfo : null;
+                if($stream !== null && isset($stream->startOffset)) {
+                    $startOffset = $stream->startOffset;
+                }
+                if($startOffset === null && $offsetInfo !== null) {
+                    $offsets = isset($offsetInfo->offsets) && $offsetInfo->offsets ? $offsetInfo->offsets : null;
+                    if($offsets && is_array($offsets) && count($offsets) > 10) {
+                        $startOffset = $offsets[0]->startOffset;
+                    }
+                }
+                if($startOffset !== null) {
+                    $md5 = self::getALSongLyricHash($oFile->uploaded_filename, $startOffset);
+                    if($md5) {
+                        $lyric = self::getALSongLyricFromServer($md5);
+                        if(!lyric && $requireRenew) {
+                            $lyric = $lyricFromFile->lyric;
+                        }
+                        self::createALSongLyricFile($file_srl, $oFile->uploaded_filename, $lyric);
+                        if($lyric) {
+                            return $lyric;
+                        } else if($lyricFileExists && isset($lyricFromFile->lyric)) {
+                            return $lyricFromFile->lyric;
+                        } else {
+                            return null;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public static function getALSongLyricHash($filepath, $startOffset) {
+        if(file_exists($filepath)) {
+            $filesize = filesize($filepath);
+            if($filesize-$startOffset < 163840) {
+                return null;
+            }
+            $fd = fopen($filepath, "rb");
+            fseek($fd, $startOffset, SEEK_SET);
+            $hash = md5(fread($fd, 163840));
+            fclose($fd);
+            return $hash;
+        }
+        return null;
+    }
+
+    public static function createALSongLyricFile($file_srl, $uploaded_filename, $lyric = null) {
+        $basepath = self::getDescriptionFilePath($file_srl, $uploaded_filename);
+        $lrcFilename = $basepath.'lyric.json';
+        if($basepath) {
+            if(file_exists($lrcFilename)) {
+                FileHandler::removeFile($lrcFilename);
+            }
+            $obj = new stdClass;
+            $obj->file_srl = $file_srl;
+            $obj->lyric = $lyric;
+            $obj->birthtime = time();
+            $json = json_encode($obj);
+            FileHandler::writeFile($lrcFilename, $json);
+        }
+    }
+
+    public static function getALSongLyricFromFile($file_srl, $uploaded_filename) {
+        $basepath = self::getDescriptionFilePath($file_srl, $uploaded_filename);
+        $lrcFilename = $basepath.'lyric.json';
+        if($basepath) {
+            if (file_exists($lrcFilename)) {
+                $lrcJSON = FileHandler::readFile($lrcFilename);
+                if($lrcJSON) {
+                    try {
+                        return json_decode($lrcJSON);
+                    } catch(Exception $e) {}
+                }
+            }
+        }
+        return null;
+    }
+    
+    public static function getALSongLyricFromServer($md5) {
+        $url = '/alsongwebservice/service1.asmx';
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>'.
+            '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://www.w3.org/2003/05/soap-envelope" xmlns:SOAP-ENC="http://www.w3.org/2003/05/soap-encoding" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ns2="ALSongWebServer/Service1Soap" xmlns:ns1="ALSongWebServer" xmlns:ns3="ALSongWebServer/Service1Soap12">
+            <SOAP-ENV:Body><ns1:GetLyric8>
+            <ns1:encData></ns1:encData>
+            <ns1:stQuery>
+            <ns1:strChecksum>'.$md5.'</ns1:strChecksum>
+            <ns1:strVersion>3.46</ns1:strVersion>
+            <ns1:strMACAddress></ns1:strMACAddress>
+            <ns1:strIPAddress>169.254.107.9</ns1:strIPAddress>
+            </ns1:stQuery>
+            </ns1:GetLyric8></SOAP-ENV:Body>
+            </SOAP-ENV:Envelope>';
+        $client = new HttpClient('lyrics.alsong.co.kr');
+        $client->post($url, $xml);
+        $content = $client->getContent();
+        preg_match('/<strLyric>(.*)?<\/strLyric>/i', $content, $lyricHTML);
+        if($lyricHTML && is_array($lyricHTML) && count($lyricHTML) === 2 && $lyricHTML[1]) {
+            $lrc = $lyricHTML[1];
+            $lrc = str_replace('&lt;br&gt;',"\n",$lrc);
+            return $lrc;
+        }
+        return null;
+    }
 }

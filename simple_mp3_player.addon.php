@@ -7,7 +7,8 @@ if(!function_exists('_simple_mp3_autoload_function')) {
           "PHPMP3" => _XE_PATH_ . 'addons/simple_mp3_player/lib/phpmp3.php',
           "getID3" => _XE_PATH_ . 'addons/simple_mp3_player/lib/getid3/getid3.php',
           "SimpleEncrypt" => _XE_PATH_ . 'addons/simple_mp3_player/simple_encrypt.module.php',
-          "SimpleMP3Describer" => _XE_PATH_ . 'addons/simple_mp3_player/simple_mp3describer.module.php'
+          "SimpleMP3Describer" => _XE_PATH_ . 'addons/simple_mp3_player/simple_mp3describer.module.php',
+          "HttpClient" => _XE_PATH_ . 'addons/simple_mp3_player/lib/HttpClient.class.php'
         );
 
         if(isset($simple_mp3_autoload_map[$class])) require_once($simple_mp3_autoload_map[$class]);
@@ -20,7 +21,7 @@ $act = Context::get('act');
 
 // before_module_init
 if($called_position === 'before_module_init' && in_array($_SERVER['REQUEST_METHOD'], array('GET', 'POST'))){
-    if(in_array($act, array('geSimpleMP3Description', 'geSimpleMP3Descriptions'))) {
+    if(in_array($act, array('getSimpleMP3Descriptions', 'getSimpleMP3Lyric'))) {
         $config = new stdClass();
         $config->use_mediasession = !(isset($addon_info->use_mediasession) && $addon_info->use_mediasession === "N");
         $config->use_url_encrypt = !(isset($addon_info->use_url_encrypt) && $addon_info->use_url_encrypt === "N");
@@ -56,25 +57,23 @@ if($called_position === 'before_module_init' && in_array($_SERVER['REQUEST_METHO
             $document_srl = Context::get('document_srl');
             $describer = new SimpleMP3Describer($config->allow_browser_cache, $config->use_url_encrypt, $password);
             $descriptions = $describer->getDescriptionsByDocumentSrl($document_srl);
+            unset($config->lyric_cache_expire);
+            unset($config->lyric_cache_retry_duration);
             $result->descriptions = $descriptions;
+        } else if($act === 'getSimpleMP3Lyric') {
+            $type = Context::get('type');
+            $file_srl = Context::get('file_srl');
+            $lyric = $file_srl ? SimpleMP3Describer::getALSongLyric($file_srl, $config->lyric_cache_expire, $config->lyric_cache_retry_duration) : null;
+            if($type === 'text') {
+                if($lyric) {
+                    echo $lyric;
+                }
+                exit();
+            } else {
+                $result->lyric = $lyric;
+            }
         }
         $result->message = "success";
-        $result->config = $config;
-        echo json_encode($result);
-
-        exit();
-    } else if($act == 'geSimpleMP3SkinInfo') {
-        $result = new stdClass();
-        $result->message = "not-implemented";
-        $result->code = -1;
-        echo json_encode($result);
-
-        exit();
-    } else if($act == 'geSimpleMP3SkinList') {
-        $result = new stdClass();
-        $result->skins = array();
-        $result->message = "not-implemented";
-        $result->code = -1;
         echo json_encode($result);
 
         exit();

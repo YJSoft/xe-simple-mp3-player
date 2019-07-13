@@ -19,7 +19,7 @@
   },
   "license": "GPLv3",
   "files": [
-    "../APlayer_fixed/css/APlayer.min.css",
+    "../APlayer_fixed/css/APlayer.css",
     "../APlayer_fixed/js/APlayer.min.js",
     "js/aplayer_fixed_loader.js"
   ]

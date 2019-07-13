@@ -921,7 +921,7 @@
 
         return new Promise(function(resolve, reject){
             var xhr = new XMLHttpRequest;
-            var url = window.request_uri+'index.php?act=geSimpleMP3Description&document_srl='+document_srl+"&file_srl="+file_srl;
+            var url = window.request_uri+'index.php?act=getSimpleMP3Description&document_srl='+document_srl+"&file_srl="+file_srl;
             xhr.open('GET', url, true);
             xhr.send();
             xhr.addEventListener('load', function(){
@@ -947,7 +947,7 @@
 
         return new Promise(function(resolve, reject){
             var xhr = new XMLHttpRequest;
-            var url = window.request_uri+'index.php?act=geSimpleMP3Descriptions&document_srl='+document_srl;
+            var url = window.request_uri+'index.php?act=getSimpleMP3Descriptions&document_srl='+document_srl;
             xhr.open('GET', url, true);
             xhr.send();
             xhr.addEventListener('load', function(){
@@ -982,7 +982,7 @@
             descriptions.forEach(function(each){
                 var description = each.description;
                 if(description) {
-                    if(description.tags === void 0) {
+                    if(!description.tags) {
                         description.tags = {
                             title: null,
                             artist: null,
@@ -1008,6 +1008,27 @@
         }
     }
 
+    function getALSongLyric(file_srl) {
+        return new Promise(function(resolve, reject) {
+            var xhr = new XMLHttpRequest;
+            var url = window.request_uri+'index.php?act=getSimpleMP3Lyric&file_srl='+file_srl;
+            xhr.open('GET', url, true);
+            xhr.send();
+            xhr.addEventListener('load', function(){
+                var data = xhr.response;
+                if (xhr.status != 200) {
+                    reject(xhr.status);
+                } else {
+                    try {
+                        var result = JSON.parse(data);
+                        resolve(result);
+                    } catch(e){
+                        reject(e);
+                    }
+                }
+            }, false);
+        });
+    }
 
     document.addEventListener("DOMContentLoaded", function(event) {
         var document_srl_regex = /document_(\d+)/.exec(jQuery('.xe_content[class*=document_]').attr('class') || '');
@@ -1051,5 +1072,6 @@
     $SimpleMP3Player.EventDispatcher = EventDispatcher;
     $SimpleMP3Player.MP3Muxer = MP3Muxer;
     $SimpleMP3Player.MSE = MSE;
+    $SimpleMP3Player.getALSongLyric = getALSongLyric;
 
 })(window.$SimpleMP3Player || (window.$SimpleMP3Player = {}));

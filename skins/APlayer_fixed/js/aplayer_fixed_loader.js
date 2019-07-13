@@ -38,18 +38,15 @@
                 url: mp3URL,
                 description: description,
                 file_srl: file_srl,
-                type: 'customHls'
+                type: 'customHls',
+                lrc: window.request_uri+'index.php?act=getSimpleMP3Lyric&file_srl='+file_srl+"&type=text"
             };
         }).filter(function(each){
             return each !== null;
         });
     }
 
-    function buildAPlayer($target, data) {
-        var ua = typeof window.navigator !== "undefined" ? window.navigator.userAgent : "";
-        if (ua.indexOf("Trident/") >= 0 || ua.indexOf("MSIE ") >= 0) {
-            return;
-        }
+    function buildAPlayer($target, data, useLyric) {
         var useMediaSession = !!($SimpleMP3Player.config && $SimpleMP3Player.config.use_mediasession);
         var $SimpleMP3PlaylistPlayer = $('<div id="SimpleMP3PlaylistPlayer__container"></div>');
         $target.prepend($SimpleMP3PlaylistPlayer);
@@ -63,6 +60,7 @@
             preload: 'auto',
             fixed: true,
             volume: 1,
+            lrcType: useLyric ? 3 : void 0,
             listFolded: false,
             listMaxHeight: '240px',
             customAudioType: {
@@ -151,7 +149,17 @@
         var document_srl_regex = /document_(\d+)/.exec($('.xe_content[class*=document_]').attr('class') || '');
         document_srl = document_srl_regex ? document_srl_regex[1] : null;
         if(document_srl && data && data.length) {
-            buildAPlayer($('body'), data);
+            var useLyric = false;
+
+            if($SimpleMP3Player.config) {
+                var config = $SimpleMP3Player.config;
+
+                if((config.isMobile && config.use_m_lyric) || (!config.isMobile && config.use_lyric)) {
+                    useLyric = true;
+                }
+            }
+
+            buildAPlayer($('body'), data, useLyric);
         }
     }
 
