@@ -498,8 +498,8 @@ class SimpleMP3Describer {
             if($description) {
                 $lyricFromFile = self::getALSongLyricFromFile($file_srl, $oFile->uploaded_filename);
                 $lyricFileExists = false;
-                $requireRenew = true;
-                if(false && $lyricFromFile) {
+                $requireRenew = false;
+                if($lyricFromFile) {
                     $lyricFileExists = true;
                     if($lyricFromFile->lyric) {
                         if($lyricFromFile->birthtime + $expire*60*60 > time()) {
@@ -607,7 +607,6 @@ class SimpleMP3Describer {
             </ns1:GetLyric8></SOAP-ENV:Body>
             </SOAP-ENV:Envelope>';
         $content = FileHandler::getRemoteResource($url, $xml, 5, "POST", "application/soap+xml");
-        debugPrint($content);
         preg_match('/<strLyric>(.*)?<\/strLyric>/i', $content, $lyricHTML);
         if($lyricHTML && is_array($lyricHTML) && count($lyricHTML) === 2 && $lyricHTML[1]) {
             $lrc = $lyricHTML[1];
