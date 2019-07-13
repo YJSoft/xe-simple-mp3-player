@@ -59,6 +59,7 @@ if($called_position === 'before_module_init' && in_array($_SERVER['REQUEST_METHO
             unset($config->lyric_cache_expire);
             unset($config->lyric_cache_retry_duration);
             $result->descriptions = $descriptions;
+            $result->config = $config;
         } else if($act === 'getSimpleMP3Lyric') {
             $type = Context::get('type');
             $file_srl = Context::get('file_srl');
