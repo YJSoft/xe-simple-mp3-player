@@ -24,6 +24,7 @@
             if(!description) {
                 return null;
             }
+            var document_srl = eachDescription.document_srl;
             var file_srl = eachDescription.file_srl;
             var filename = description.filename;
             var tags = description.tags || {};
@@ -40,7 +41,7 @@
                 description: description,
                 file_srl: file_srl,
                 type: 'customHls',
-                lrc: window.request_uri+'index.php?act=getSimpleMP3Lyric&file_srl='+file_srl+"&type=text"
+                lrc: window.request_uri+'index.php?act=getSimpleMP3Lyric&file_srl=' + file_srl + '&document_srl=' + document_srl +'&type=text'
             };
         }).filter(function(each){
             return each !== null;

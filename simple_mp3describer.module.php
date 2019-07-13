@@ -180,6 +180,7 @@ class SimpleMP3Describer {
                 }
                 $obj = new stdClass;
                 $obj->file_srl = $file->file_srl;
+                $obj->document_srl = $document_srl;
                 $obj->description = $description;
                 $descriptions[] = $obj;
             }
