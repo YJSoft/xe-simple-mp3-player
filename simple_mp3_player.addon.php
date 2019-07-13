@@ -51,7 +51,7 @@ if($called_position === 'before_module_init' && in_array($_SERVER['REQUEST_METHO
         }
 
         $result = new stdClass();
-        if($act === 'geSimpleMP3Descriptions') {
+        if($act === 'getSimpleMP3Descriptions') {
             ini_set('max_execution_time', 15);
             $document_srl = Context::get('document_srl');
             $describer = new SimpleMP3Describer($config->allow_browser_cache, $config->use_url_encrypt, $password);

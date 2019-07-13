@@ -1,5 +1,5 @@
 <?php
-$act = $_GET['act']
+$act = $_GET['act'];
 if($act == 'getSimpleMP3SkinInfo') {
     $result = new stdClass();
     $result->message = "not-implemented";
