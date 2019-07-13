@@ -590,9 +590,9 @@ class SimpleMP3Describer {
         }
         return null;
     }
-    
+
     public static function getALSongLyricFromServer($md5) {
-        $url = '/alsongwebservice/service1.asmx';
+        $url = 'http://lyrics.alsong.co.kr/alsongwebservice/service1.asmx';
         $xml = '<?xml version="1.0" encoding="UTF-8"?>'.
             '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://www.w3.org/2003/05/soap-envelope" xmlns:SOAP-ENC="http://www.w3.org/2003/05/soap-encoding" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ns2="ALSongWebServer/Service1Soap" xmlns:ns1="ALSongWebServer" xmlns:ns3="ALSongWebServer/Service1Soap12">
             <SOAP-ENV:Body><ns1:GetLyric8>
@@ -605,9 +605,7 @@ class SimpleMP3Describer {
             </ns1:stQuery>
             </ns1:GetLyric8></SOAP-ENV:Body>
             </SOAP-ENV:Envelope>';
-        $client = new HttpClient('lyrics.alsong.co.kr');
-        $client->post($url, $xml);
-        $content = $client->getContent();
+        $content = FileHandler::getRemoteResource($url, $xml, 5, "POST", "application/soap+xml");
         preg_match('/<strLyric>(.*)?<\/strLyric>/i', $content, $lyricHTML);
         if($lyricHTML && is_array($lyricHTML) && count($lyricHTML) === 2 && $lyricHTML[1]) {
             $lrc = $lyricHTML[1];
