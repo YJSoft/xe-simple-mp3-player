@@ -526,6 +526,10 @@
         }
 
         MSE.prototype.seekResetAction = function() {
+            if(!this._audio && this.isDestructed()) {
+                return;
+            }
+            
             var that = this;
             this.abort();
             if(this._request && !this._request.isSettled()) {
