@@ -159,7 +159,7 @@ class SimpleMP3Describer {
                                     array('key'=>'type', 'value'=>'realtime')
                                 ));
                                 $currentOffset += $eachOffset->time;
-                                if($currentOffset > $this->time_limit) break;
+                                if($this->time_limit != -1 && $currentOffset > $this->time_limit) break;
                             }
                         }
                     } else {
