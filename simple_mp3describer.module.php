@@ -6,12 +6,14 @@ class SimpleMP3Describer {
     private $use_encrypt = false;
     private $password = null;
     private $allow_browser_cache = false;
+    private $time_limit = -1;
 
-    public function __construct($allow_browser_cache = false, $use_encrypt = false, $password = null) {
+    public function __construct($allow_browser_cache = false, $use_encrypt = false, $time_limit = -1, $password = null) {
         if($password) {
             $this->password = $password;
         }
         $this->allow_browser_cache = $allow_browser_cache;
+        $this->time_limit = $time_limit;
         if($use_encrypt && SimpleEncrypt::isEncryptSupported()) {
             $this->use_encrypt = $use_encrypt;
             $this->password = $password ? $password : SimpleEncrypt::getPassword();
@@ -157,6 +159,7 @@ class SimpleMP3Describer {
                                     array('key'=>'type', 'value'=>'realtime')
                                 ));
                                 $currentOffset += $eachOffset->time;
+                                if($currentOffset > $this->time_limit) break;
                             }
                         }
                     } else {

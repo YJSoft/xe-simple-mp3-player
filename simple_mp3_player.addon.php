@@ -34,6 +34,7 @@ if($called_position === 'before_module_init' && in_array($_SERVER['REQUEST_METHO
         $config->use_m_lyric = (isset($addon_info->use_m_lyric) && $addon_info->use_m_lyric === "Y");
         $config->lyric_cache_expire = isset($addon_info->lyric_cache_expire) && $addon_info->lyric_cache_expire ? $addon_info->lyric_cache_expire : 72;
         $config->lyric_cache_retry_duration = isset($addon_info->lyric_cache_retry_duration) && $addon_info->lyric_cache_retry_duration ? $addon_info->lyric_cache_retry_duration : 30;
+        $config->guest_play_limit_time = isset($addon_info->guest_play_limit_time) && $addon_info->guest_play_limit_time ? $addon_info->guest_play_limit_time : -1;
         $config->isMobile = Mobile::isFromMobilePhone();
 
         if(!$config->default_cover) {
@@ -60,8 +61,11 @@ if($called_position === 'before_module_init' && in_array($_SERVER['REQUEST_METHO
         $result = new stdClass();
         if($act === 'getSimpleMP3Descriptions') {
             ini_set('max_execution_time', 15);
+            if(Context::get('is_logged')) {
+                $config->guest_play_limit_time = -1;
+            }
             $document_srl = Context::get('document_srl');
-            $describer = new SimpleMP3Describer($config->allow_browser_cache, $config->use_url_encrypt, $password);
+            $describer = new SimpleMP3Describer($config->allow_browser_cache, $config->use_url_encrypt, $config->guest_play_limit_time, $password);
             $descriptions = $describer->getDescriptionsByDocumentSrl($document_srl);
             unset($config->lyric_cache_expire);
             unset($config->lyric_cache_retry_duration);
